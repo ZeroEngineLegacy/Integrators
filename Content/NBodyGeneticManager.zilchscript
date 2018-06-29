@@ -1,0 +1,297 @@
+class SceneConfigurationData
+{
+  var InitialMass : Real;
+  var InitialPosition : Real3;
+  var InitialScale : Real3;
+  var InitialVelocity : Real3;
+}
+
+class SpaceConfigData
+{
+  var Objects : Array[SceneConfigurationData] = Array[SceneConfigurationData]();
+  var Score : Real = 0.0;
+  var Done : Boolean = false;
+  
+  function Add(objData : SceneConfigurationData)
+  {
+    this.Objects.Add(objData);
+  }
+  
+  function ToString() : String
+  {
+    var builder = StringBuilder();
+    for(var i = 0; i < this.Objects.Count; ++i)
+    {
+      var object = this.Objects[i];
+      builder.WriteLine("i:");
+      builder.WriteLine("  `object.InitialPosition`");
+    }
+    return builder.ToString();
+  }
+}
+
+class GenerationData
+{
+  var SpaceData : Array[SpaceConfigData] = Array[SpaceConfigData]();
+  var SpaceToConfig : HashMap[Space, SpaceConfigData] = HashMap[Space, SpaceConfigData]();
+  
+  function Add(spaceData : SpaceConfigData)
+  {
+    this.SpaceData.Add(spaceData);
+  }
+  
+  function Add(space : Space, spaceData : SpaceConfigData)
+  {
+    this.SpaceData.Add(spaceData);
+    this.SetSpace(space, spaceData);
+  }
+  
+  function SetSpace(space : Space, spaceData : SpaceConfigData)
+  {
+    this.SpaceToConfig.Add(space, spaceData);
+  }
+  
+  function Clear()
+  {
+    this.SpaceData.Clear();
+    this.SpaceToConfig.Clear();
+  }
+  
+  var Count : Integer
+  {
+    get { return this.SpaceData.Count; }
+  }
+  
+  function Get(index : Integer) : SpaceConfigData
+  {
+    return this.SpaceData[index];
+  }
+}
+
+class GenerationSeedData
+{
+  [Property] var ObjectCount : Integer = 5;
+  [Property] var DensityRange : Real2 = Real2(0.5, 100);
+  [Property] var ScaleRadiusRange : Real2 = Real2(1, 5);
+  [Property] var PositionRadiusRange : Real2 = Real2(0, 50);
+  [Property] var VelocityRadiusRange : Real2 = Real2(0, 5);
+}
+
+
+class NBodyGeneticManager : ZilchComponent
+{
+  [Dependency] var RandomContext : RandomContext;
+  [Dependency] var BaseGameManager : BaseGameManager;
+  
+  [Property] var Active : Boolean = true;
+  [Property] var GenerationSize : Integer = 16;
+  [Property] var GenerationDuration : Real = 10.0;
+  [Property] var GenerationSeedData : GenerationSeedData = GenerationSeedData();
+  
+  [Property] var Integrator : Archetype = Archetype.SemiImplicitEuler;
+  [Property] var ObjArchetype : Archetype = Archetype.NBodyObject;
+  
+  var CurrentGenerationData : GenerationData = GenerationData();
+  var Timer : Real = 0.0;
+  
+  function Initialize(init : CogInitializer)
+  {
+    if(this.Active)
+    {
+      Zero.Connect(this.Owner, Events.GameSetup, this.OnGameSetup);
+      Zero.Connect(Zero.Engine, Events.EngineUpdate, this.OnEngineUpdate);
+    }
+  }
+  
+  function GenerateObjectData() : SceneConfigurationData
+  {
+    var result = SceneConfigurationData();
+    
+    var data = this.GenerationSeedData;
+    var density = this.RandomContext.Range(data.DensityRange.X, data.DensityRange.Y);
+    var radius = this.RandomContext.Range(data.ScaleRadiusRange.X, data.ScaleRadiusRange.Y);
+    var scale = radius * 2;
+    var pos2D = this.RandomContext.Vector2(data.PositionRadiusRange.X, data.PositionRadiusRange.Y);
+    var vel2D = this.RandomContext.Vector2(data.VelocityRadiusRange.X, data.VelocityRadiusRange.Y);
+    var pos3D = Real3(pos2D, 0);
+    var vel3D = Real3(vel2D, 0);
+    
+    var volume = (4.0 / 3.0) * Math.Pi * radius * radius * radius;
+    var mass = volume * density;
+    
+    var configData = SceneConfigurationData()
+    {
+      InitialMass = mass,
+      InitialScale = Real3(scale),
+      InitialPosition = pos3D,
+      InitialVelocity = vel3D,
+    };
+    return configData;
+  }
+  
+  function CreateObject(space : Space, configData : SceneConfigurationData)
+  {
+    var obj = space.CreateAtPosition(this.ObjArchetype, configData.InitialPosition);
+    obj.RigidBody.DynamicState = RigidBodyDynamicState.Kinematic;
+    obj.Transform.Scale = configData.InitialScale;
+    
+    var body = obj.GetComponentByName("IntegratableObject") as IntegratableObject;
+    body.Position = configData.InitialPosition;
+    body.Velocity = configData.InitialVelocity;
+    body.Mass = configData.InitialMass;
+  }
+  
+  function GenerateSpaceConfigData() : SpaceConfigData
+  {
+    var result = SpaceConfigData();
+    var data = this.GenerationSeedData;
+    for(var i = 0; i < data.ObjectCount; ++i)
+    {
+      var configData = this.GenerateObjectData();
+      result.Add(configData);
+    }
+    return result;
+  }
+  
+  function CreateSpaceData() : SpaceConfigData
+  {
+    var spaceData = SpaceConfigData();
+    var data = this.GenerationSeedData;
+    for(var i = 0; i < data.ObjectCount; ++i)
+    {
+      var configData = this.GenerateObjectData();
+      spaceData.Add(configData);
+    }
+    return spaceData;
+  }
+  
+  function CreateGenerationData() : GenerationData
+  {
+    var generationData = GenerationData();
+    for(var i = 0; i < this.GenerationSize; ++i)
+    {
+      var spaceData = this.CreateSpaceData();
+      generationData.Add(spaceData);
+    }
+    return generationData;
+  }
+  
+  function CreateObjects(space : Space, spaceConfig : SpaceConfigData)
+  {
+    //spaceConfig = this.GenerateSpaceConfigData();
+    foreach(var objConfig in spaceConfig.Objects)
+    {
+      this.CreateObject(space, objConfig);
+    }
+  }
+  
+  function GetSpaceScore(space : Space) : Real
+  {
+    var toSend = NBodyGeneticQueryEvent();
+    space.DispatchEvent(Events.QueryNBodyScore, toSend);
+    
+    return toSend.TotalScore;
+  }
+  
+  function CreateSpace(index : Integer, spaceConfig : SpaceConfigData) : Space
+  {
+    var space = this.BaseGameManager.CreateSpaceAndLevel(this.Integrator, index, this.GenerationSize);
+    space.TimeSpaceGeneticScorer.MaxTime = this.GenerationDuration;
+    this.CreateObjects(space, spaceConfig);
+    return space;
+  }
+  
+  function CreateGeneration(generationData : GenerationData)
+  {
+    for(var i = 0; i < generationData.Count; ++i)
+    {
+      var spaceData = generationData[i];
+      var space = this.CreateSpace(i, spaceData);
+      generationData.SetSpace(space, spaceData);
+    }
+  }
+  
+  function MutateGeneration(generationData : GenerationData) : GenerationData
+  {
+    var bestSpace : Space = null;
+    var bestScore : Real = Real.NegativeMin;
+    var bestI = 0;
+    var i = 0;
+    foreach(var space in generationData.SpaceToConfig.Keys)
+    {
+      //var score = this.GetSpaceScore(space);
+      var score = generationData.SpaceToConfig[space].Score;
+      if(score > bestScore)
+      {
+        bestScore = score;
+        bestSpace = space;
+        bestI = i;
+      }
+      ++i;
+    }
+    
+    Console.WriteLine("Best: `bestI`");
+    var newGeneration = this.CreateGenerationData();
+    newGeneration.SpaceData[0] = generationData.SpaceToConfig[bestSpace];
+    return newGeneration;
+  }
+  
+  function DestroyGenerationSpaces(generationData : GenerationData)
+  {
+    foreach(var space in generationData.SpaceToConfig.Keys)
+    {
+      space.Destroy();
+    }
+  }
+  
+  
+  var Count : Integer = 0;
+  
+  function FinishGeneration()
+  {
+    var newGeneration = this.MutateGeneration(this.CurrentGenerationData);
+    this.DestroyGenerationSpaces(this.CurrentGenerationData);
+    
+    this.CurrentGenerationData = newGeneration;
+    this.CreateGeneration(this.CurrentGenerationData);
+  }
+  
+  function RemoveSpace(space : Space, score : Real)
+  {
+    var data = this.CurrentGenerationData.SpaceToConfig[space];
+    data.Score = score;
+    data.Done = true;
+    
+    foreach(var spaceData in this.CurrentGenerationData.SpaceData)
+    {
+      if(spaceData.Done == false)
+        return;
+    }
+    
+    this.FinishGeneration();
+  }
+  
+  function OnEngineUpdate(event : UpdateEvent)
+  {
+    
+    var dt = 1 / 60.0;
+    this.Timer += dt;//event.Dt;
+    
+    if(this.Timer < this.GenerationDuration)
+      return;
+      
+    if(this.Owner.MarkedForDestruction)
+      return;
+      
+    this.Timer = 0;
+    
+    //this.FinishGeneration();
+    
+  }
+  
+  function OnGameSetup(event : GameEvent)
+  {
+    this.CurrentGenerationData = this.CreateGenerationData();
+    this.CreateGeneration(this.CurrentGenerationData);
+  }
+}

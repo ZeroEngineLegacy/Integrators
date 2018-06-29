@@ -1,0 +1,19 @@
+[Version:1]
+DataContent 
+{
+	ContentTags 
+	{
+		var Tags = Array
+		{
+		}
+	}
+	ZilchPluginBuilder 
+	{
+		var Name = "PluginIntegrators"
+		var ResourceId = 0x59f301deb0e89a16
+		var LoaderType = "ZilchPluginSource"
+		var Version = 0
+		var ShowInEditor = true
+		var SharedLibraryResourceId = 0x59f301deb0e89a1c
+	}
+}

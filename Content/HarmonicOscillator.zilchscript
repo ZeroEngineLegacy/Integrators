@@ -1,0 +1,25 @@
+class HarmonicOscillator : ZilchComponent
+{
+  [Property] var Y0 : Real = 0.0;
+  [Property] var SpringCoefficient : Real = 1.0;
+  [Property] var DampingCoefficient : Real = 1.0;
+  
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Space, "ApplyGlobalForces", this.OnApplyGlobalForces);
+  }
+
+  function OnApplyGlobalForces(event : Event)
+  {
+    var obj = this.Owner.GetComponentByName("IntegratableObject") as IntegratableObject;
+    var pY = obj.Position.Y;
+    var vY = obj.Velocity.Y;
+    
+    var force = -this.SpringCoefficient * pY - this.DampingCoefficient * vY;
+    obj.Force += Real3(0, force, 0);
+  }
+
+  function OnLogicUpdate(event : UpdateEvent)
+  {
+  }
+}

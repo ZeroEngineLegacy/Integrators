@@ -1,0 +1,18 @@
+[Version:1]
+DataContent 
+{
+	ContentTags 
+	{
+		var Tags = Array
+		{
+		}
+	}
+	DataBuilder 
+	{
+		var Name = "HarmonicOscillator"
+		var ResourceId = 0x59f1cb78db2dddf2
+		var LoaderType = "Level"
+		var Version = 0
+		var ShowInEditor = true
+	}
+}

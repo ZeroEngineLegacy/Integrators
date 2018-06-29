@@ -1,0 +1,9 @@
+[Version:1]
+TextContent 
+{
+	ZilchScriptBuilder 
+	{
+		var Name = "NBodyGeneticManager"
+		var ResourceId = 0x59fec00aaa240f3f
+	}
+}

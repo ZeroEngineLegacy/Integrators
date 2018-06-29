@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Versions\$(OS)-$(PlatformShortName)-$(ZeroVersion)\ZeroEngine.cpp">
+      <Filter>Zero</Filter>
+    </ClCompile>
+    <ClCompile Include="Versions\$(OS)-$(PlatformShortName)-$(ZeroVersion)\Core.cpp">
+      <Filter>Zero</Filter>
+    </ClCompile>
+    <ClCompile Include="PluginIntegrators.cpp">
+      <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PluginIntegratorsPrecompiled.cpp">
+      <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegratableObject.cpp">
+      <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomObjectEvent.cpp">
+      <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseIntegrator.cpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="ExplicitEuler.cpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="MidPointIntegrator.cpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="SemiImplicitEuler.cpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClCompile>
+    <ClCompile Include="VelocityVerlet.cpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Versions\$(OS)-$(PlatformShortName)-$(ZeroVersion)\ZeroEngine.hpp">
+      <Filter>Zero</Filter>
+    </ClInclude>
+    <ClInclude Include="Versions\$(OS)-$(PlatformShortName)-$(ZeroVersion)\Core.hpp">
+      <Filter>Zero</Filter>
+    </ClInclude>
+    <ClInclude Include="Versions\$(OS)-$(PlatformShortName)-$(ZeroVersion)\Zilch.hpp">
+      <Filter>Zero</Filter>
+    </ClInclude>
+    <ClInclude Include="PluginIntegrators.hpp">
+      <Filter>Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="PluginIntegratorsPrecompiled.hpp">
+      <Filter>Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="IntegratableObject.hpp">
+      <Filter>Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomObjectEvent.hpp">
+      <Filter>Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseIntegrator.hpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="ExplicitEuler.hpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="MidPointIntegrator.hpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="SemiImplicitEuler.hpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClInclude>
+    <ClInclude Include="VelocityVerlet.hpp">
+      <Filter>Plugin\Integrators</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Zero">
+      <UniqueIdentifier>{383bdb07-6f79-4944-85cd-b13856f5d65e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugin">
+      <UniqueIdentifier>{54948aa7-0f0e-4833-80ac-e6f3967be802}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugin\Integrators">
+      <UniqueIdentifier>{b22d903b-bfb7-4d5e-8be5-8da07108249b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ZeroVisualizers.natvis" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+[Version:1]
+TextContent 
+{
+	ContentTags 
+	{
+		var Tags = Array
+		{
+			"Sample2DCameras[1.0]"
+		}
+	}
+	ZilchScriptBuilder 
+	{
+		var Name = "EditorCamera2D"
+		var ResourceId = 0x59db32071c84eaea
+	}
+}

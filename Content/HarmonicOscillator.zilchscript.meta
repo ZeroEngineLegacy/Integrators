@@ -1,0 +1,9 @@
+[Version:1]
+TextContent 
+{
+	ZilchScriptBuilder 
+	{
+		var Name = "HarmonicOscillator"
+		var ResourceId = 0x59f1cb0cd9f151c6
+	}
+}

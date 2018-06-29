@@ -1,0 +1,69 @@
+class NBodyCollisionDetector : ZilchComponent
+{
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Owner, Events.CollisionStarted, this.OnCollisionStarted);
+  }
+
+  function OnCollisionStarted(event : CollisionEvent)
+  {
+    //this.Owner.Destroy();
+  }
+}
+
+class NBodyGeneticQueryEvent : ZilchEvent
+{
+  var TotalScore : Real = 0.0;
+  
+  sends QueryNBodyScore : NBodyGeneticQueryEvent;
+}
+
+class NBodyGeneticData : ZilchComponent
+{
+  var Score : Real = 0;
+  
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Owner, Events.CollisionStarted, this.OnCollisionStarted);
+    Zero.Connect(this.Space, Events.QueryNBodyScore, this.OnQueryNBodyScore);
+  }
+
+  function OnQueryNBodyScore(event : NBodyGeneticQueryEvent)
+  {
+    var pos = this.Owner.Transform.WorldTranslation;
+    var distance = Math.Distance(pos, Real3());
+    var total = this.Score - distance;
+    event.TotalScore += total;
+    //Console.WriteLine("Object `this.Owner`: `total` `distance` `this.Score` `pos`");
+  }
+  
+  function OnCollisionStarted(event : CollisionEvent)
+  {
+    this.Score -= 100;
+  }
+}
+
+class TimeSpaceGeneticScorer : ZilchComponent
+{
+  var Timer : Real = 0;
+  var MaxTime : Real = 100;
+  var Frames : Integer = 0;
+  
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+  }
+
+  function OnLogicUpdate(event : UpdateEvent)
+  {
+    this.Timer += event.Dt;
+    ++this.Frames;
+    if(this.Timer < this.MaxTime)
+      return;
+      
+    var toSend = NBodyGeneticQueryEvent();
+    this.Owner.DispatchEvent(Events.QueryNBodyScore, toSend);
+    
+    this.Owner.GameSession.NBodyGeneticManager.RemoveSpace(this.Space, toSend.TotalScore);
+  }
+}

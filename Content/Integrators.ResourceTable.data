@@ -1,0 +1,33 @@
+[Version:1]
+ResourceTable 
+{
+	var ResourceType = "Archetype"
+	var EntryList = Array
+	{
+		Object
+		{
+			var Name = "ExplicitEuler"
+			var Value = "59f0254af015f3a9:ExplicitEuler"
+			var Weight = 1
+		}
+		Object
+		{
+			var Name = "SemiImplicitEuler"
+			var Value = "59f0255af7fe63fe:SemiImplicitEuler"
+			var Weight = 1
+		}
+		Object
+		{
+			var Name = "MidPoint"
+			var Value = "59f02574f8486ed1:MidPoint"
+			var Weight = 1
+		}
+		Object
+		{
+			var Name = "VelocityVerlet"
+			var Value = "59f1dbf00d5aa0ef:VelocityVerlet"
+			var Weight = 1
+		}
+	}
+	var MaxWeight = 1
+}

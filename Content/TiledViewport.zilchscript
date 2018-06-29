@@ -1,0 +1,94 @@
+class TiledViewportEvent : ZilchEvent
+{
+  var Index : Integer = 0;
+  var Count : Integer = 1;
+  var Overlay : Boolean = false;
+  var Visible : Boolean = true;
+}
+
+class TiledViewport : ZilchComponent
+{
+  [Dependency] var CameraViewport : CameraViewport;
+  sends ActivateTiledViewport : TiledViewportEvent;
+  
+  [Property] var Active : Boolean = true;
+  [Property] var StartVisible : Boolean = false;
+  
+  var NormalizedSize : Real2 = Real2();
+  var NormalizedOffset : Real2 = Real2();
+  
+  function Initialize(init : CogInitializer)
+  {
+    if(!this.Active)
+      return;
+    
+    this.CameraViewport.RenderInGame = this.StartVisible;
+    Zero.Connect(this.Space, Events.ActivateTiledViewport, this.OnActivateTiledViewport);
+  }
+
+  function OnActivateTiledViewport(event : TiledViewportEvent)
+  {
+    var viewport = this.CameraViewport;
+    var renderer = viewport.RendererPath.Cog;
+    
+    viewport.RenderInGame = event.Visible;
+    
+    var rowCount = Math.Sqrt(event.Count as Real);
+    var objectsPerRow = Math.Ceil(rowCount) as Integer;
+    var x = event.Index % objectsPerRow;
+    var y = event.Index / objectsPerRow;
+    
+    if(!event.Overlay)
+    {
+      viewport.NormalizedSize = Real2(1 / objectsPerRow as Real);
+      viewport.NormalizedOffset = viewport.NormalizedSize * Real2(x, y);
+    }
+    else
+    {
+      renderer.ForwardRenderer.ClearColor = Real4(0);
+    }
+    
+    this.NormalizedSize = viewport.NormalizedSize;
+    this.NormalizedOffset = viewport.NormalizedOffset;
+  }
+}
+
+// Zooms a viewport to take up the entire viewport.
+class ViewportZoom : ZilchComponent
+{
+  [Dependency] var CameraViewport : CameraViewport;
+  [Dependency] var TiledViewport : TiledViewport;
+  
+  [Property] var Active : Boolean = true;
+  [Property] var ZoomSpeed : Real = 0.25;
+  
+  var Zoomed : Boolean = false;
+  
+  function Initialize(init : CogInitializer)
+  {
+    if(!this.Active)
+      return;
+    
+    Zero.Connect(this.Space, Events.MiddleClick, this.OnMiddleClick);
+  }
+
+  function OnMiddleClick(event : ViewportMouseEvent)
+  {
+    var grop = Actions.Group(this.Owner.Actions);
+    
+    if(this.Zoomed)
+    {
+      this.CameraViewport.RenderOrder = 0;
+      Action.Property(grop, @this.CameraViewport.NormalizedSize, this.TiledViewport.NormalizedSize, this.ZoomSpeed, Ease.Linear);
+      Action.Property(grop, @this.CameraViewport.NormalizedOffset, this.TiledViewport.NormalizedOffset, this.ZoomSpeed, Ease.Linear);
+      this.Zoomed = false;
+    }
+    else
+    {
+      this.CameraViewport.RenderOrder = 100;
+      Action.Property(grop, @this.CameraViewport.NormalizedSize, Real2(1), this.ZoomSpeed, Ease.Linear);
+      Action.Property(grop, @this.CameraViewport.NormalizedOffset, Real2(0), this.ZoomSpeed, Ease.Linear);
+      this.Zoomed = true;
+    }
+  }
+}

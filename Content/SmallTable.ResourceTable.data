@@ -1,0 +1,15 @@
+[Version:1]
+ResourceTable 
+{
+	var ResourceType = "Archetype"
+	var EntryList = Array
+	{
+		Object
+		{
+			var Name = "SemiImplicitEuler"
+			var Value = "59f0254af015f3a9:ExplicitEuler"
+			var Weight = 1
+		}
+	}
+	var MaxWeight = 1
+}

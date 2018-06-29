@@ -1,0 +1,34 @@
+class GameManager : ZilchComponent
+{
+  [Dependency] var BaseGameManager : BaseGameManager;
+  
+  [Property] var Active : Boolean = true;
+  [Property] var IntegratorsTable : ResourceTable = ResourceTable.Integrators;
+  
+  function Initialize(init : CogInitializer)
+  {
+    if(this.Active)
+      Zero.Connect(this.Owner, Events.GameSetup, this.OnGameSetup);
+  }
+  
+  function OnGameSetup(event : GameEvent)
+  {
+    event.Handled = true;
+    var count = this.IntegratorsTable.Count;
+    
+    var rowCount = Math.Sqrt(count as Real);
+    var objectsPerRow = Math.Ceil(rowCount) as Integer;
+    
+    for(var i = 0; i < count; ++i)
+    {
+      var entry = this.IntegratorsTable[i];
+      var archetype = entry.Resource as Archetype;
+      
+      var space = this.BaseGameManager.CreateSpaceAndLevel(archetype, i, count);
+      
+      var titleTextCog = space.FindObjectByName("TitleText");
+      var spriteText = titleTextCog.SpriteText;
+      spriteText.Text = entry.Name;
+    }
+  }
+}

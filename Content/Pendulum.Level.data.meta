@@ -1,0 +1,18 @@
+[Version:1]
+DataContent 
+{
+	ContentTags 
+	{
+		var Tags = Array
+		{
+		}
+	}
+	DataBuilder 
+	{
+		var Name = "Pendulum"
+		var ResourceId = 0x59f1f25f22b50158
+		var LoaderType = "Level"
+		var Version = 0
+		var ShowInEditor = true
+	}
+}

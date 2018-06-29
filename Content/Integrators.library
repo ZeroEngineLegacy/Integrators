@@ -1,0 +1,8 @@
+[Version:1]
+ContentLibrary 
+{
+	var Name = "Integrators"
+	var LibraryId = 0x59f30094e877f1ab
+	var SourceControlType = ""
+	var ReadOnly = false
+}

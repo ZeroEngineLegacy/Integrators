@@ -1,0 +1,9 @@
+[Version:1]
+TextContent 
+{
+	ZilchScriptBuilder 
+	{
+		var Name = "NBodyCollisionDetector"
+		var ResourceId = 0x59f1e37dbc3d5e36
+	}
+}

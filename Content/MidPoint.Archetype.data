@@ -1,0 +1,14 @@
+[Version:1]
+Cog 
+{
+	var Name = ""
+	Transform 
+	{
+		var Translation = Real3{12.8492508, 0, 0}
+		var Scale = Real3{1, 1, 1}
+		var Rotation = Quaternion{0, 0, 0, 1}
+	}
+	MidPointIntegrator 
+	{
+	}
+}

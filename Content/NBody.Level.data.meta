@@ -1,0 +1,18 @@
+[Version:1]
+DataContent 
+{
+	ContentTags 
+	{
+		var Tags = Array
+		{
+		}
+	}
+	DataBuilder 
+	{
+		var Name = "NBody"
+		var ResourceId = 0x59f1d7c636d3a9fb
+		var LoaderType = "Level"
+		var Version = 0
+		var ShowInEditor = true
+	}
+}

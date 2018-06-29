@@ -1,0 +1,60 @@
+class NBody : ZilchComponent
+{
+  [Property] var G : Real = 10.0;
+  [Property] var Epsilon : Real = 0.1;
+  
+  var Objects : Array[Cog] = Array[Cog]();
+  
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Space, "AddIntegratableObject", this.OnAddIntegratableObject);
+    Zero.Connect(this.Space, "ApplyGlobalForces", this.OnApplyGlobalForces);
+  }
+
+  function OnAddIntegratableObject(event : CustomObjectEvent)
+  {
+    this.Objects.Add(event.Cog);
+    Zero.Connect(event.Cog, Events.CogDestroy, this.OnCogDestroy);
+  }
+
+  function OnCogDestroy(event : ObjectEvent)
+  {
+    this.Objects.RemoveFirst(event.Source as Cog);
+  }
+  
+  function ComputeForces(obj0 : Cog, obj1 : Cog)
+  {
+    var data0 = obj0.GetComponentByName("IntegratableObject") as IntegratableObject;
+    var data1 = obj1.GetComponentByName("IntegratableObject") as IntegratableObject;
+    
+    var m0 = data0.Mass;
+    var p0 = data0.Position;
+    
+    var m1 = data1.Mass;
+    var p1 = data1.Position;
+    
+    var diff = p1 - p0;
+    var denom = Math.Length(diff);
+    denom = denom * denom * denom + this.Epsilon;
+    var numer = this.G * m0 * m1;
+    
+    var force = (numer / denom) * diff;
+    
+    data1.Force -= force;
+    data0.Force += force;
+  }
+  
+  function OnApplyGlobalForces(event : Event)
+  {
+    for(var i = 0; i < this.Objects.Count; ++i)
+    {
+      for(var j = i + 1; j < this.Objects.Count; ++j)
+      {
+        var obj0 = this.Objects[i];
+        var obj1 = this.Objects[j];
+        
+        this.ComputeForces(obj0, obj1);
+      }
+    }
+  }
+}

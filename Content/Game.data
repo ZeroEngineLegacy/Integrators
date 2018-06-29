@@ -1,0 +1,68 @@
+[Version:1]
+GameSession 
+{
+	var Name = ""
+	NetPeer 
+	{
+		var DetectOutgoingChanges = true
+		var AcceptIncomingChanges = true
+		var AllowNapping = true
+		var AccurateTimestampOnOnline = true
+		var AccurateTimestampOnChange = true
+		var AccurateTimestampOnOffline = true
+		var AutomaticChannel = "56f22bdc94800e65:Default"
+		var NetPropertyInfos = Array
+		{
+		}
+		var LanDiscoverable = true
+		var InternetDiscoverable = true
+		var HostPortRangeStart = 8000
+		var HostPortRangeEnd = 9000
+		var HostPingInterval = 0.25
+		var InternetHostPublishInterval = 30
+		var InternetHostRecordLifetime = 60
+		var InternetSameIpHostRecordLimit = 64
+		var FrameFillWarning = 0.800000012
+		var FrameFillSkip = 0.899999976
+		var InternetHostListTimeout = 4
+		var BasicHostInfoTimeout = 3
+		var ExtraHostInfoTimeout = 4
+	}
+	RandomContext 
+	{
+		var RandomSeed = false
+		var Seed = 3870522288
+	}
+	BaseGameManager 
+	{
+		var StartingSpace = "576f215c0825de61:Space"
+		var StartingLevel = "59097123da28242a:Level"
+		var LoadEditingLevel = true
+		var ViewportMode = ViewportMode.Tiled
+		var SingleViewportIndex = 3
+		var SpeedUpScale = 1
+		var SubSteps = 1
+		var TimeScale = 1
+	}
+	GameManager 
+	{
+		var Active = true
+		var IntegratorsTable = "59f024be0c019420:Integrators"
+	}
+	NBodyGeneticManager 
+	{
+		var Active = false
+		var GenerationSize = 16
+		var GenerationDuration = 20
+		var GenerationSeedData = GenerationSeedData
+		{
+			var ObjectCount = 5
+			var DensityRange = Real2{0.5, 2}
+			var ScaleRadiusRange = Real2{0.5, 2}
+			var PositionRadiusRange = Real2{0, 40}
+			var VelocityRadiusRange = Real2{0, 5}
+		}
+		var Integrator = "59f0255af7fe63fe:SemiImplicitEuler"
+		var ObjArchetype = "59fec1468e995240:NBodyObject"
+	}
+}

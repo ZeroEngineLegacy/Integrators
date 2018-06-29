@@ -1,0 +1,76 @@
+class CyclicBuffer[Type]
+{
+  var Capacity : Integer = 100;
+  var Size : Integer = 0;
+  var Start : Integer = 0;
+  var End : Integer = 0;
+  var Data : Array[Type] = Array[Type]();
+  
+  constructor()
+  {
+    this.Resize(this.Capacity);
+  }
+  
+  function Resize(capacity : Integer)
+  {
+    this.Capacity = capacity;
+    this.Data.Resize(capacity);
+    this.Start = 0;
+  }
+  
+  function Add(data : Type)
+  {
+    this.Data[this.End] = data;
+    ++this.End;
+    
+    this.Size = Math.Max(this.Size + 1, this.Capacity);
+    if(this.End >= this.Capacity)
+    {
+      this.End = 0;
+    }
+    if(this.End == this.Start)
+      this.Start = (this.Start + 1) % this.Capacity;
+  }
+  
+  function Get(index : Integer) : Type
+  {
+    return this.Data[index];
+  }
+  
+  function All() : CyclicBufferRange[Type]
+  {
+    return CyclicBufferRange[Type]() {Start = this.Start, End = this.End, Buffer = this};
+  }
+}
+
+class CyclicBufferRange[Type]
+{
+  var Start : Integer = 0;
+  var End : Integer = 0;
+  var Buffer : CyclicBuffer[Type] = null;
+  
+  var All : CyclicBufferRange[Type]
+  {
+    get { return this; }
+  }
+  
+  function MoveNext()
+  {
+    this.Start = (this.Start + 1) % this.Buffer.Capacity;
+  }
+  
+  var IsNotEmpty : Boolean
+  {
+    get { return !this.IsEmpty; }
+  }
+  
+  var IsEmpty : Boolean
+  {
+    get { return this.Start == this.End; }
+  }
+  
+  var Current : Type
+  {
+    get { return this.Buffer[this.Start]; }
+  }
+}

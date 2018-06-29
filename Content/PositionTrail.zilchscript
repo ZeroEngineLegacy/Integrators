@@ -1,0 +1,51 @@
+class PositionTrail : ZilchComponent
+{
+  [Property] var Active : Boolean = true;
+  [Property] var MaxCount : Integer = 100;
+  [Property] var TrailColor : Real4 = Real4(1);
+  [Property] var Frequency : Integer = 1;
+  var CurrentCount : Integer = 0;
+  
+  var ScaledFrequency : Integer;
+  var Positions : CyclicBuffer[Real3] = CyclicBuffer[Real3]();
+  
+  function Initialize(init : CogInitializer)
+  {
+    this.ScaledFrequency = this.Frequency * this.Space.TimeSpace.StepCount;
+    this.Positions.Resize(this.MaxCount);
+    
+    Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+    Zero.Connect(this.Owner, "TransformIntegrated", this.OnTransformIntegrated);
+  }
+
+  function OnLogicUpdate(event : UpdateEvent)
+  {
+    if(!this.Active)
+      return;
+      
+    var range = this.Positions.All();
+    if(range.IsEmpty)
+      return;
+      
+    var prev = range.Current;
+    range.MoveNext;
+    foreach(var curr in range)
+    {
+      DebugDraw.Add(DebugLine(prev, curr) {Color = this.TrailColor});
+      prev = curr;
+    }
+  }
+  
+  function OnTransformIntegrated(event : Event)
+  {
+    ++this.CurrentCount;
+    if(this.CurrentCount != this.ScaledFrequency)
+      return;
+      
+    this.CurrentCount = 0;
+    
+    this.Positions.Add(this.Owner.Transform.WorldTranslation);
+    
+    
+  }
+}

@@ -1,0 +1,79 @@
+enum ViewportMode
+{
+  Tiled, Overlay, Single
+}
+
+class BaseGameManager : ZilchComponent
+{
+  [Property] var StartingSpace : Archetype = Archetype.DefaultSpace;
+  [Property] var StartingLevel : Level = Level.Level;
+  [Property] var LoadEditingLevel : Boolean = true;
+  
+  [Property] var ViewportMode : ViewportMode = ViewportMode.Tiled;
+  [Property] var SingleViewportIndex : Integer = 0;
+  [Property] var SpeedUpScale : Integer = 1;
+  [Property] var SubSteps : Integer = 1;
+  [Property] var TimeScale : Real = 1;
+  
+  function GetIntegrator(cog : Cog) : BaseIntegrator
+  {
+    // Dll plugins make it hard right now to find an interface type.
+    // Instead just use zilch meta for now...
+    for(var i = 0; i < cog.ComponentCount; ++i)
+    {
+      var component = cog.GetComponentByIndex(i);
+      if(typeid(component).IsA(typeid(BaseIntegrator)))
+        return component as BaseIntegrator;
+    }
+    return null;
+  }
+  
+  // Send an event to the space to setup the viewport state
+  function SendViewportEvent(space : Space, index : Integer, count : Integer)
+  {
+    var viewportInitializationEvent = TiledViewportEvent();
+    viewportInitializationEvent.Overlay = this.ViewportMode == ViewportMode.Overlay;
+    // If this is single mode then pretend there's only 1 viewport and only
+    // activate the one at the given index.
+    if(this.ViewportMode == ViewportMode.Single)
+    {
+      viewportInitializationEvent.Count = 1;
+      viewportInitializationEvent.Index = 0;
+      viewportInitializationEvent.Visible = index == this.SingleViewportIndex;
+    }
+    // Otherwise, we're in tiled mode
+    else
+    {
+      viewportInitializationEvent.Count = count;
+      viewportInitializationEvent.Index = index;
+    }
+    
+    space.DispatchEvent(Events.ActivateTiledViewport, viewportInitializationEvent);
+  }
+  
+  function CreateLevel(space : Space, level : Level, integratorArchetype : Archetype, index : Integer, count : Integer)
+  {
+    // Create the integrator first (so it's setup before the objects are created)
+    var integratorCog = space.Create(integratorArchetype);
+    var integrator = this.GetIntegrator(integratorCog);
+    // Scale the sub-steps of the integrator
+    integrator.SubSteps = this.SubSteps * this.SpeedUpScale;
+    
+    space.LoadLevel(level);
+    // Scale the time space
+    space.TimeSpace.TimeScale = this.TimeScale * this.SpeedUpScale;
+    
+    this.SendViewportEvent(space, index, count);
+  }
+  
+  function CreateSpaceAndLevel(integratorArchetype : Archetype, index : Integer, count : Integer) : Space
+  {
+    var level = this.StartingLevel;
+    if(this.LoadEditingLevel)
+      level = Zero.Editor.EditLevel;
+      
+    var space = this.GameSession.CreateSpace(this.StartingSpace);
+    this.CreateLevel(space, level, integratorArchetype, index, count);
+    return space;
+  }
+}

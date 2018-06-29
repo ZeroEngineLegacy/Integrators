@@ -1,0 +1,9 @@
+[Version:1]
+TextContent 
+{
+	ZilchScriptBuilder 
+	{
+		var Name = "Test"
+		var ResourceId = 0x59f3029e71c73ac5
+	}
+}

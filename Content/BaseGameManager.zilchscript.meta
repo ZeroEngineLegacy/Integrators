@@ -1,0 +1,9 @@
+[Version:1]
+TextContent 
+{
+	ZilchScriptBuilder 
+	{
+		var Name = "BaseGameManager"
+		var ResourceId = 0x59fef9ffb13b0cc2
+	}
+}

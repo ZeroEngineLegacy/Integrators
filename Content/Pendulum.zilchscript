@@ -1,0 +1,62 @@
+class Pendulum : ZilchComponent
+{
+  [Dependency] var Transform : Transform;
+  [Dependency] var IntegratableObject : IntegratableObject;
+  
+  [Property] var ThetaDegrees : Real = 45;
+  [Property] var Length : Real = 10;
+  [Property] var Origin : Real3 = Real3.Zero;
+  [Property] var Gravity : Real = 10;
+  [Property] var PenaltyCoefficient : Real = 5;
+  [Property] var PendulumColor : Real4 = Real4(1);
+  
+  var ThetaRadians : Real = 0;
+  
+  function Initialize(init : CogInitializer)
+  {
+    Zero.Connect(this.Space, "ApplyGlobalForces", this.OnApplyGlobalForces);
+    Zero.Connect(this.Space, Events.LogicUpdate, this.OnLogicUpdate);
+    this.SetupInitialPosition();
+  }
+  
+  function SetupInitialPosition()
+  {
+    var obj = this.Owner.GetComponentByName("IntegratableObject") as IntegratableObject;
+    this.ThetaRadians = Math.ToRadians(this.ThetaDegrees);
+    
+    var offset = Math.RotateVector(-Real3.YAxis, -Real3.ZAxis, this.ThetaRadians) * this.Length;
+    obj.Position = this.Origin + offset;
+  }
+  
+  function OnLogicUpdate(event : UpdateEvent)
+  {
+    this.DebugDraw();
+  }
+  
+  function DebugDraw()
+  {
+    var pos = this.IntegratableObject.Position;
+    DebugDraw.Add(DebugLine(pos, this.Origin));
+  }
+
+  function OnApplyGlobalForces(event : Event)
+  {
+    var obj = this.Owner.GetComponentByName("IntegratableObject") as IntegratableObject;
+    
+    var down = -Real3.YAxis;
+    var d = obj.Position - this.Origin;
+    var length = Math.Length(d);
+    d = Math.Normalize(d);
+    var perp = Math.ProjectOnPlane(down, d);
+    
+    var cosTheta = Math.Dot(down, d);
+    var theta = Math.ACos(cosTheta);
+    
+    var gForce = this.Gravity / obj.Mass;
+    var gravityForce = down * gForce;
+    var tensionForce = -obj.Mass * d * this.Gravity * Math.Cos(theta);
+    var netForce = Math.Sin(theta) * obj.Mass * this.Gravity * perp;
+    var penaltyForce = -this.PenaltyCoefficient * d * (length - this.Length);
+    obj.Force += penaltyForce + tensionForce + gravityForce;
+  }
+}
